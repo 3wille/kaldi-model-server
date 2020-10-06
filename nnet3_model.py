@@ -315,7 +315,7 @@ def decode_chunked_partial_endpointing_mic(asr, feat_info, decodable_opts, paudi
                                            samp_freq=16000, record_samplerate=16000, chunk_size=1024, wait_for_start_command=False, record_message_history=False, compute_confidences=True, asr_client=None, speaker_str="Speaker",
                                            resample_algorithm="sinc_best", save_debug_wav=False, use_threads=False, minimum_num_frames_decoded_per_speaker=5, mic_vol_cutoff=0.5, use_local_mic=True, decode_control_channel='asr_control',
                                            audio_data_channel='asr_audio'):
-    
+
     # Subscribe to command and control redis channel
     p = red.pubsub()
     p.subscribe(decode_control_channel)
@@ -350,7 +350,7 @@ def decode_chunked_partial_endpointing_mic(asr, feat_info, decodable_opts, paudi
     rawblocks = []
 
     if use_local_mic:
-        # Open microphone channel 
+        # Open microphone channel
         print("Open microphone stream with id" + str(input_microphone_id) + "...")
         stream = paudio.open(format=pyaudio.paInt16, channels=channels, rate=record_samplerate, input=True,
                             frames_per_buffer=chunk_size, input_device_index=input_microphone_id)
@@ -364,7 +364,7 @@ def decode_chunked_partial_endpointing_mic(asr, feat_info, decodable_opts, paudi
     # Send event (with redis) to the front that ASR session is ready
     asr_client.asr_ready(speaker=speaker)
 
-    # Initialize a ThreadPoolExecutor. 
+    # Initialize a ThreadPoolExecutor.
     # Note that we initialize the thread executer independently of whether we actually use it later (the -t option).
     # At the end of this loop we have two code paths, one that uses a computation future (with -t) and one without it.
     with ThreadPoolExecutor(max_workers=1) as executor:
@@ -398,7 +398,7 @@ def decode_chunked_partial_endpointing_mic(asr, feat_info, decodable_opts, paudi
                 elif msg['data'] == b"reset_timer":
                     print('Reset time command received!')
                     asr_client.resetTimer()
-            
+
             if use_local_mic:
                 # We always consume from the microphone stream, even if we do not decode
                 block_raw = stream.read(chunk_size, exception_on_overflow=False)
@@ -440,7 +440,7 @@ def decode_chunked_partial_endpointing_mic(asr, feat_info, decodable_opts, paudi
                 if need_endpoint_finalize and prev_num_frames_decoded == 0:
                     print("WARN need_endpoint_finalize and prev_num_frames_decoded == 0")
 
-            # Finalize the decoding here, if endpointing signalized that we should start a new utterance. 
+            # Finalize the decoding here, if endpointing signalized that we should start a new utterance.
             # We might also need to finalize if we switch from do_decode=True to do_decode=False (user starts/stops decoding from frontend).
             if need_finalize and block is not None and prev_num_frames_decoded > 0:
                 print("prev_num_frames_decoded:",prev_num_frames_decoded)
@@ -459,7 +459,7 @@ def decode_chunked_partial_endpointing_mic(asr, feat_info, decodable_opts, paudi
 
                 prev_num_frames_decoded = 0
 
-            # If we operate on multichannel data, select the channel here that has the highest volume 
+            # If we operate on multichannel data, select the channel here that has the highest volume
             # (with some added heuristic, only change the speaker if the previous speaker was active for minimum_num_frames_decoded_per_speaker many frames)
             if channels > 1:
                 block = np.reshape(block, (-1, channels))
@@ -467,7 +467,7 @@ def decode_chunked_partial_endpointing_mic(asr, feat_info, decodable_opts, paudi
                 # Select loudest channel
                 volume_norms = []
                 for i in range(channels):
-                    # We have a simplyfied concept of loudness, it is simply the L2 of the chunk interpreted as a vector (sqrt of the sum of squares): 
+                    # We have a simplyfied concept of loudness, it is simply the L2 of the chunk interpreted as a vector (sqrt of the sum of squares):
                     # This has nothing to do with the physical loudness.
 
                     volume_norms.append(np.linalg.norm(block[:, i] / 65536.0) * 10.0)
@@ -589,7 +589,7 @@ def advance_mic_decoding(adaptation_state, asr, asr_client, block, chunks_decode
             # Get the partial output from the decoder (best path)
             out = asr.get_partial_output()
 
-            # Debug output (partial utterance) 
+            # Debug output (partial utterance)
             print(key + "-utt%d-part%d" % (utt, part),
                   out["text"], flush=True)
             # Now send the partial Utterance to the frontend (that then displays it to the user)
@@ -693,6 +693,7 @@ if __name__ == '__main__':
     parser.add_argument('-w', '--save_debug_wav', dest='save_debug_wav', help='This will write out a debug.wav (resampled)'
                                                                               ' and debugraw.wav (original) after decoding,'
                                                                               ' so that the recording quality can be analysed', action='store_true', default=False)
+    parser.add_argument('--audio-data-channel', dest='audio_data_channel', type=str, help='Set a redis channel to receive audio PCM data over')
 
     args = parser.parse_args()
 
