@@ -411,7 +411,7 @@ def decode_chunked_partial_endpointing_mic(asr, feat_info, decodable_opts, paudi
                     continue
                 else:
                     npblock = np.frombuffer(block_audio_redis_msg['data'], dtype=np.int16)
-                    print("audio data: ", npblock)
+                    # print("audio data: ", npblock)
 
             # Resample the block if necessary, e.g. 48kHz -> 16kHz
             if need_resample:
