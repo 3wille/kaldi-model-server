@@ -259,7 +259,7 @@ def decode_chunked_partial_endpointing(asr, feat_info, decodable_opts, scp, chun
                             confd = confd[:token_length]
 
                     print(confd)
-                    print(key + "-utt%d-final" % utt, out["text"], flush=True)
+                    # print(key + "-utt%d-final" % utt, out["text"], flush=True)
                     if asr_client is not None:
                         asr_client.completeUtterance(utterance=out["text"], key=key +
                                                         "-utt%d-part%d" % (utt, part), confidences=confd)
@@ -283,8 +283,8 @@ def decode_chunked_partial_endpointing(asr, feat_info, decodable_opts, scp, chun
                 elif num_frames_decoded > prev_num_frames_decoded:
                     prev_num_frames_decoded = num_frames_decoded
                     out = asr.get_partial_output()
-                    print(key + "-utt%d-part%d" % (utt, part),
-                          out["text"], flush=True)
+                    # print(key + "-utt%d-part%d" % (utt, part),
+                        #   out["text"], flush=True)
                     if asr_client is not None:
                         asr_client.partialUtterance(utterance=out["text"],key=key + "-utt%d-part%d" % (utt, part))
                     part += 1
@@ -293,7 +293,7 @@ def decode_chunked_partial_endpointing(asr, feat_info, decodable_opts, scp, chun
         mbr = MinimumBayesRisk(out["lattice"])
         confd = mbr.get_one_best_confidences()
         print(out)
-        print(key + "-utt%d-final" % utt, out["text"], flush=True)
+        # print(key + "-utt%d-final" % utt, out["text"], flush=True)
         if asr_client is not None:
             asr_client.completeUtterance(utterance=out["text"],key=key +"-utt%d-part%d" % (utt, part),confidences=confd)
 
@@ -546,7 +546,7 @@ def decode_chunked_partial_endpointing_mic(asr, feat_info, decodable_opts, paudi
     mbr = MinimumBayesRisk(out["lattice"])
     confd = mbr.get_one_best_confidences()
     print(out)
-    print(key + "-utt%d-final" % utt, out["text"], flush=True)
+    # print(key + "-utt%d-final" % utt, out["text"], flush=True)
     if asr_client is not None:
         asr_client.completeUtterance(utterance=out["text"], key=key + "-utt%d-part%d" % (utt, part), confidences=confd, speaker=speaker)
         asr_client.sendstatus(isDecoding=False,shutdown=True)
@@ -590,8 +590,8 @@ def advance_mic_decoding(adaptation_state, asr, asr_client, block, chunks_decode
             out = asr.get_partial_output()
 
             # Debug output (partial utterance)
-            print(key + "-utt%d-part%d" % (utt, part),
-                  out["text"], flush=True)
+            # print(key + "-utt%d-part%d" % (utt, part),
+            #       out["text"], flush=True)
             # Now send the partial Utterance to the frontend (that then displays it to the user)
             if asr_client is not None:
                 asr_client.partialUtterance(utterance=out["text"], key=key + "-utt%d-part%d" % (utt, part), speaker=speaker)
@@ -621,7 +621,7 @@ def finalize_decode(asr, asr_client, key, part, speaker, utt):
     # confd is a vector with a confidence for each word of the best path
     confd = mbr.get_one_best_confidences()
     print(confd)
-    print(key + "-utt%d-final" % utt, out["text"], flush=True)
+    # print(key + "-utt%d-final" % utt, out["text"], flush=True)
 
     # Now send the final utterance to the frontend (this will also indicate that this is a final utterance and the front displays it differently)
     if asr_client is not None:
@@ -693,7 +693,6 @@ if __name__ == '__main__':
     parser.add_argument('-w', '--save_debug_wav', dest='save_debug_wav', help='This will write out a debug.wav (resampled)'
                                                                               ' and debugraw.wav (original) after decoding,'
                                                                               ' so that the recording quality can be analysed', action='store_true', default=False)
-    parser.add_argument('--audio-data-channel', dest='audio_data_channel', type=str, help='Set a redis channel to receive audio PCM data over')
 
     args = parser.parse_args()
 
